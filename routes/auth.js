@@ -16,8 +16,11 @@ router.put('/login/:id',function(req,res,next){
     res.send({type:'PUT'})
 });
 
-router.delete('/login/:id',function(req,res,next){
-    res.send({type:'DELETE'})
+router.delete('/login/:userID',function(req,res,next){
+    //console.log(req.params.userID)
+    User.findByIdAndRemove({_id:req.params.userID}).then(function(user){
+        res.send(user);
+    });
 });
 
 
