@@ -1,4 +1,5 @@
 const express = require('express');
+const User = require('../models/user');
 const router = express.Router();
 
 router.get('/login',function(req,res){
@@ -6,12 +7,9 @@ router.get('/login',function(req,res){
 });
 
 router.post('/login',function(req,res){
-    console.log(req.body);
-    res.send({
-        type:'POST',
-        name:req.body.name,
-        lvl:req.body.lvl
-    })
+    User.create(req.body).then(function(user){
+          res.send(user);
+    });
 });
 
 router.put('/login/:id',function(req,res){

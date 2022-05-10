@@ -4,24 +4,28 @@ const Schema =mongoose.Schema;
 //create user schema
 const UserSchema= new Schema({
    nom: {
-      type:STRING,
-      allowNull: false
+      type:String,
+      required:[true,'required']
     },
     prenom: {
-      type:STRING,
-      allowNull: false
+      type:String,
+      required:[true,'required']
     },
     email: {
-      type:STRING,
-      allowNull: false,
+      type:String,
+      required:[true,'required'],
       unique: true
     },
     password: {
-      type:STRING,
-      allowNull: false
+      type:String,
+      required:[true,'required']
     },
     isSuperAdmin: {
-      type:BOOLEAN,
+      type:Boolean,
       defaultValue: false
     }
-})
+
+});
+
+const User=mongoose.model('user',UserSchema);
+module.exports=User;
