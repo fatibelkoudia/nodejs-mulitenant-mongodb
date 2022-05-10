@@ -1,10 +1,26 @@
 const express = require('express');
-const app = require('../app');
-const router = express.Router()
+const router = express.Router();
 
-router.post('/login', function (req, res, next) {
+router.get('/login',function(req,res){
+    res.send({type:'GET'})
+});
 
-)};
+router.post('/login',function(req,res){
+    console.log(req.body);
+    res.send({
+        type:'POST',
+        name:req.body.name,
+        lvl:req.body.lvl
+    })
+});
+
+router.put('/login/:id',function(req,res){
+    res.send({type:'PUT'})
+});
+
+router.delete('/login/:id',function(req,res){
+    res.send({type:'DELETE'})
+});
 
 
 

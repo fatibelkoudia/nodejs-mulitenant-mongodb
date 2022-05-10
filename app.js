@@ -1,20 +1,21 @@
-const createError = require('http-errors');
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
+const authRouter=require('./routes/auth');
 const port = 3000
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello World!</h1>')
-  })
-  
-   app.use(bodyParser.json());
+//set up express app
+const app = express();
 
+
+app.use(bodyParser.json());
+
+//initialization routes 
 app.use('/auth', authRouter);
 
 
+
   app.listen(port, () => {
-    console.log('app listening on port ${port}')
+    console.log('app listening on port 3000')
   })
 
 
