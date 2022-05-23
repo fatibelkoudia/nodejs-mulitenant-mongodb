@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
-
 //create  Account schema
 const AccountSchema = new Schema({
   name: {
@@ -25,4 +24,4 @@ const AccountSchema = new Schema({
   },
 });
 
-module.exports = AccountSchema;
+export default AccountSchema;
