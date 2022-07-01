@@ -1,2 +1,2 @@
 export * from "./dbConnector";
-export { default as userUtils } from "./userUtils";
+export { default as jwtUtils } from "./jwtUtils";

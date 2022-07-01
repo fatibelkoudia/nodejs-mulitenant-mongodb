@@ -1,19 +1,14 @@
 import passport from "passport";
 import passportJWT from "passport-jwt";
 import LocalStrategy from "passport-local";
-import config from "../../config";
 import dbRepo from "../services/dbRepo";
-import { getDBNameFromRequest } from "../utils/dbConnector";
+import { getDBKeyFromPayload, getDBKeyFromRequest } from "../utils/dbConnector";
+import jwtUtils from "../utils/jwtUtils";
 
 const JwtStrategy = passportJWT.Strategy;
-const ExtractJwt = passportJWT.ExtractJwt;
 
 // config for JWT strategy
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: config.jwtSecret,
-  passReqToCallback: true,
-};
+const jwtOptions = jwtUtils.jwtOptions();
 
 // config for local strategy
 const localOptions = {
@@ -26,14 +21,15 @@ const localOptions = {
 const localLogin = new LocalStrategy(
   localOptions,
   async (request, email, password, done) => {
-    const dbName = await getDBNameFromRequest(dbRepo, request);
+    const dbKey = await getDBKeyFromRequest(dbRepo, request);
     // if the specified tenant database name is not found in the default database, call done with null
-    if (dbName === "") {
+    if (dbKey === "") {
       return done(null, false, { message: "Invalid TENANT-ID." });
     }
-    if (dbName === null) {
+    if (dbKey === null) {
       return done(null, false, { message: "No TENANT-ID was specified." });
     }
+    const dbName = "tenant_" + dbKey;
     const User = dbRepo[dbName].model("User");
     User.findOne({ email: email }, (err, user) => {
       if (err) {
@@ -51,7 +47,7 @@ const localLogin = new LocalStrategy(
         if (!isMatch) {
           return done(null, false, { message: "Incorrect password." });
         }
-        return done(null, user);
+        return done(null, user, { tenantId: dbKey });
       });
     });
   }
@@ -59,18 +55,13 @@ const localLogin = new LocalStrategy(
 
 // Create JWT strategy
 const jwtLogin = new JwtStrategy(jwtOptions, async (req, payload, done) => {
-  const dbName = await getDBNameFromRequest(dbRepo, req);
-  // if the specified tenant database name is not found in the default database (has no account), call done with null
-  if (dbName === "") {
-    return done(null, false, { message: "Invalid TENANT-ID." });
+  const dbName = await getDBKeyFromPayload(dbRepo, payload);
+  // if the specified tenant id is not found, then the jwt token is invalid
+  if (!dbName) {
+    return done(null, false, { message: "Invalid JWT." });
   }
-  if (dbName === null) {
-    return done(null, false, { message: "No TENANT-ID was specified." });
-  }
-  const User = await dbRepo[dbName].model("User");
-  // check if the user id in the payload exists in it's tenant database (has an account)
-  // if it does, call done with the user
-  // if it doesn't, call done with null
+  const User = await dbRepo["tenant_" + dbName].model("User");
+
   User.findById(payload.sub, (err, user) => {
     if (err) {
       return done(err, false);

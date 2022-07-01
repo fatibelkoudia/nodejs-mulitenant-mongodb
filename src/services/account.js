@@ -6,7 +6,7 @@ export const AccountService = {
     return new Promise(function (resolve, reject) {
       let account;
       try {
-        account = Account.findOne({ tenantId: tenantId }).exec();
+        account = Account.findOne({ tenantId: tenantId });
       } catch (err) {
         reject(err);
       }

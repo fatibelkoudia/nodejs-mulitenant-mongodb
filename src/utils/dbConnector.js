@@ -32,26 +32,43 @@ export const addConnectionToRepo = (dbRepo, dbName) => {
  * extract the tenanat id from the request headers which is used to determine which database to use
  * @param {Object} dbRepo the database pool
  * @param {Request} req the request object
- * returns dbName if found, empty string if not found, null if no tenant id was specified
+ * returns dbKey if found, empty string if not found, null if no tenant id was specified
  */
-export const getDBNameFromRequest = async (dbRepo, req) => {
+export const getDBKeyFromRequest = async (dbRepo, req) => {
   // extract tenant id from request headers
   const tenentId = req.headers["tenant-id"];
 
   // if the tenantId is specified in the request headers, we want to connect to the tenant database
   // if it's not specified, we want to connect to the default database
   if (tenentId) {
-    const dbName = "tenant_" + tenentId;
+    const dbKey = tenentId;
+    const dbName = "tenant_" + dbKey;
     // check the existence of the tenant database name in the default database
     let account = await AccountService.getAccountByTenantId(tenentId);
     if (account) {
       // if the database pool doesn't contain the tenant database yet, create it
       addConnectionToRepo(dbRepo, dbName);
-      return dbName;
+      return dbKey;
     } else {
       return "";
     }
   }
 
+  return null;
+};
+
+/**
+ * extract the tenanat id from the paylaod which is used to determine which database to use
+ * @param {*} dbRepo the database pool
+ * @param {*} payload
+ * @returns teneant id if found in the payload, otherwise null
+ */
+export const getDBKeyFromPayload = (dbRepo, payload) => {
+  const tenantId = payload.tenant;
+  const dbName = "tenant_" + tenantId;
+  if (tenantId) {
+    addConnectionToRepo(dbRepo, dbName);
+    return tenantId;
+  }
   return null;
 };
